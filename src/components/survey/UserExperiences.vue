@@ -55,6 +55,10 @@ export default {
           this.results = results;
         });
     }
+  },
+  // The mounted() загружает ранее загруженные данные при перезагрузке страницы
+  mounted() {
+    this.loadExperiences();
   }
 };
 </script>
