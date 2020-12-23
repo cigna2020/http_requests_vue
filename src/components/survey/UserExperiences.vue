@@ -7,7 +7,11 @@
           >Load Submitted Experiences</base-button
         >
       </div>
-      <ul>
+      <p v-if="isLoading">Loading...</p>
+      <p v-else-if="!isLoading && (!results || results.length === 0)">
+        No stored experience found. Start adding some survey result first.
+      </p>
+      <ul v-else-if="!isLoading && results && results.length > 0">
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -29,31 +33,34 @@ export default {
   },
   data() {
     return {
-      results: []
+      results: [],
+      isLoading: false
     };
   },
   methods: {
     loadExperiences() {
-      // method POST - a default method that doesn't require header and body
-      fetch(
-        'https://vue-http-demo-30c54-default-rtdb.firebaseio.com/surveys.json'
-      )
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          }
-        })
-        .then(data => {
-          const results = [];
-          for (const id in data) {
-            results.push({
-              id: id,
-              name: data[id].name,
-              rating: data[id].rating
-            });
-          }
-          this.results = results;
-        });
+      // method GET - a default method that doesn't require header and body
+      (this.isLoading = true),
+        fetch(
+          'https://vue-http-demo-30c54-default-rtdb.firebaseio.com/surveys.json'
+        )
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+          })
+          .then(data => {
+            this.isLoading = false;
+            const results = [];
+            for (const id in data) {
+              results.push({
+                id: id,
+                name: data[id].name,
+                rating: data[id].rating
+              });
+            }
+            this.results = results;
+          });
     }
   },
   // The mounted() загружает ранее загруженные данные при перезагрузке страницы
