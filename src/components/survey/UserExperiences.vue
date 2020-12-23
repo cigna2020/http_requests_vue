@@ -8,10 +8,15 @@
         >
       </div>
       <p v-if="isLoading">Loading...</p>
+      <p v-else-if="errorMessage">
+        Unfortunately, you face with next error: {{ errorMessage }}
+      </p>
       <p v-else-if="!isLoading && (!results || results.length === 0)">
         No stored experience found. Start adding some survey result first.
       </p>
-      <ul v-else-if="!isLoading && results && results.length > 0">
+      <ul
+        v-else-if="!isLoading && results && results.length > 0 && !errorMessage"
+      >
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -34,13 +39,15 @@ export default {
   data() {
     return {
       results: [],
-      isLoading: false
+      isLoading: false,
+      errorMessage: null
     };
   },
   methods: {
     loadExperiences() {
       // method GET - a default method that doesn't require header and body
       (this.isLoading = true),
+        (this.errorMessage = null),
         fetch(
           'https://vue-http-demo-30c54-default-rtdb.firebaseio.com/surveys.json'
         )
@@ -60,6 +67,10 @@ export default {
               });
             }
             this.results = results;
+          })
+          .catch(error => {
+            this.isLoading = false;
+            this.errorMessage = error;
           });
     }
   },
